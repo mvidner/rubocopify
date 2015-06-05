@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+# TODO:
+
+# --style / -s(default)
+# --lint  / -l
+#
+# --once /  -1
+
+# check we are on rubocop branch, create it
+# (tell and sleep)
+
+# generate .rubocop.yml if it does not exist
+# (detect if this is a yast repo, if yes insert the inherit)
+# (tell and sleep)
+
+# group similar changes: whitespace
+NAME = ".rubocop.yml"
+conf = File.read(NAME)
+
+# category = "Style"
+category = "Lint"
+COP_CONFIG_RX = %r{
+  \n
+  \n
+  \# \s Offense \s count .* \n
+  \# \s Cop \s supports \s --auto-correct .* \n
+  (?: \# [^\n]* \n )*
+  ^ ( #{category} / .* ) : \n
+  .*
+  \n
+}x
+
+cop_name = nil
+conf.sub!(COP_CONFIG_RX) do
+  cop_name = Regexp.last_match(1)
+  "\n"
+end
+
+if cop_name.nil?
+  puts "No more autocorrectable cops of category #{category}"
+  exit 1
+end
+
+File.write(NAME, conf)
+
+system "rubocop --auto-correct"
+system "git commit --all --message 'Rubocop autocorrected: #{cop_name}'"
+system "git show | cat"
