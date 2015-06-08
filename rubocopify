@@ -53,7 +53,6 @@ def setup_branch
   $?.success? || fail
 end
 
-puts "BRANCH", options[:branch]
 setup_branch if options[:branch]
 
 ##################################################################
