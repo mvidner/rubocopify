@@ -9,3 +9,41 @@ Style/StringLiterals:
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+# Offense count: 4
+# Cop supports --auto-correct.
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+# Offense count: 2
+# Configuration parameters: CountComments.
+Metrics/MethodLength:
+  Max: 25
+
+# Offense count: 1
+# Configuration parameters: Exclude.
+Style/FileName:
+  Enabled: false
+
+# Offense count: 1
+# Cop supports --auto-correct.
+Style/NegatedIf:
+  Enabled: false
+
+# Offense count: 2
+Style/RegexpLiteral:
+  MaxSlashes: 0
+
+# Offense count: 4
+Style/RescueModifier:
+  Enabled: false
+
+# Offense count: 1
+# Cop supports --auto-correct.
+Style/SpaceAfterNot:
+  Enabled: false
+
+# Offense count: 3
+# Cop supports --auto-correct.
+Style/SpecialGlobalVars:
+  Enabled: false
