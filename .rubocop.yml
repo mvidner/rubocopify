@@ -32,8 +32,3 @@ Style/RegexpLiteral:
 # Offense count: 4
 Style/RescueModifier:
   Enabled: false
-
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/SpecialGlobalVars:
-  Enabled: false

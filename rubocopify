@@ -45,12 +45,12 @@ def setup_branch
   return if current_branch == "heads/#{BRANCH}"
 
   system "git checkout #{BRANCH}"
-  return if $?.success?
+  return if $CHILD_STATUS.success?
 
   system "git branch #{BRANCH}"
-  $?.success? || fail
+  $CHILD_STATUS.success? || fail
   system "git checkout #{BRANCH}"
-  $?.success? || fail
+  $CHILD_STATUS.success? || fail
 end
 
 setup_branch if options[:branch]
