@@ -1,49 +1,98 @@
 #!/usr/bin/env ruby
 
-# TODO:
+# TODO: group similar changes: whitespace
 
-# --style / -s(default)
-# --lint  / -l
-#
-# --once /  -1
+require "optparse"
 
-# check we are on rubocop branch, create it
-# (tell and sleep)
+categories = []
+options = {
+  once: false
+}
 
-# generate .rubocop.yml if it does not exist
-# (detect if this is a yast repo, if yes insert the inherit)
-# (tell and sleep)
+op = OptionParser.new do |opts|
+  opts.banner = "Usage: rubocopify [options]"
+  opts.on("-s", "--style", "Apply Style/* cops (default)") do |v|
+    categories << "Style"
+  end
+  opts.on("-l", "--lint", "Apply Lint/* cops") do |v|
+    categories << "Lint"
+  end
+  opts.on("-1", "--once", "Only the first cop, don't loop") do |v|
+    options[:once] = v
+  end
+end
+op.parse!
 
-# group similar changes: whitespace
-NAME = ".rubocop.yml"
-conf = File.read(NAME)
+categories = ["Style"] if categories.empty?
 
-# category = "Style"
-category = "Lint"
-COP_CONFIG_RX = %r{
-  \n
-  \n
-  \# \s Offense \s count .* \n
-  \# \s Cop \s supports \s --auto-correct .* \n
-  (?: \# [^\n]* \n )*
-  ^ ( #{category} / .* ) : \n
-  .*
-  \n
-}x
+##################################################################
 
-cop_name = nil
-conf.sub!(COP_CONFIG_RX) do
-  cop_name = Regexp.last_match(1)
-  "\n"
+current_branch = `git describe --all`.chomp
+if current_branch != "heads/rubocop"
+  system "git checkout -b rubocop"
 end
 
-if cop_name.nil?
-  puts "No more autocorrectable cops of category #{category}"
-  exit 1
+##################################################################
+
+YML = ".rubocop.yml"
+TODO_YML = ".rubocop_todo.yml"
+
+unless File.exist? YML
+  if (File.read "RPMNAME" rescue "").start_with? "yast"
+    File.write(YML,
+               "# use the shared Yast defaults\n" \
+               "inherit_from:\n" \
+               "  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml\n"
+               )
+  end
+
+  system "rubocop --auto-gen-config"
+
+  config = (File.read(YML) rescue "") + File.read(TODO_YML)
+  File.write(YML, config)
+  File.unlink(TODO_YML)
+
+  system "git add #{YML}; git commit --message 'Rubocop: --auto-gen-config'"
 end
 
-File.write(NAME, conf)
+##################################################################
 
-system "rubocop --auto-correct"
-system "git commit --all --message 'Rubocop autocorrected: #{cop_name}'"
-system "git show | cat"
+# @return [Boolean] false if there are no more cops to run
+def apply_one_cop(categories)
+  conf = File.read(YML)
+
+  COP_CONFIG_RX = %r{
+    \n
+    \n
+    \# \s Offense \s count .* \n
+    \# \s Cop \s supports \s --auto-correct .* \n
+    (?: \# [^\n]* \n )*
+    ^ ( (?: #{categories.join '|'} ) / .* ) : \n
+    .*
+    \n
+  }x
+
+  cop_name = nil
+  conf.sub!(COP_CONFIG_RX) do
+    cop_name = Regexp.last_match(1)
+    "\n"
+  end
+
+  if cop_name.nil?
+    puts "No more autocorrectable cops of category #{categories.join ', '}."
+    return false
+  end
+
+  File.write(YML, conf)
+
+  system "rubocop --auto-correct"
+  system "git commit --all --message 'Rubocop autocorrected: #{cop_name}'"
+  system "git show | cat"
+
+  true
+end
+
+loop do
+  apply_one_cop(categories) || break
+  break if options[:once]
+end
