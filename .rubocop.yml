@@ -10,11 +10,6 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Lint/UnusedBlockArgument:
-  Enabled: false
-
 # Offense count: 2
 # Configuration parameters: CountComments.
 Metrics/MethodLength:

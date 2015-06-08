@@ -12,10 +12,10 @@ options = {
 
 op = OptionParser.new do |opts|
   opts.banner = "Usage: rubocopify [options]"
-  opts.on("-s", "--style", "Apply Style/* cops (default)") do |v|
+  opts.on("-s", "--style", "Apply Style/* cops (default)") do |_v|
     categories << "Style"
   end
-  opts.on("-l", "--lint", "Apply Lint/* cops") do |v|
+  opts.on("-l", "--lint", "Apply Lint/* cops") do |_v|
     categories << "Lint"
   end
   opts.on("-1", "--once", "Only the first cop, don't loop") do |v|
