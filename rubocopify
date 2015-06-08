@@ -32,7 +32,7 @@ categories = ["Style"] if categories.empty?
 ##################################################################
 
 uncommitted = `git status --porcelain`
-if ! uncommitted.empty?
+unless uncommitted.empty?
   puts uncommitted
   exit 1
 end
@@ -102,7 +102,7 @@ def apply_one_cop(categories)
   end
 
   if cop_name.nil?
-    puts "No more autocorrectable cops of category #{categories.join ', '}."
+    puts "No more autocorrectable cops of category #{categories.join ", "}."
     return false
   end
 
