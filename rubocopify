@@ -2,6 +2,7 @@
 
 # TODO: group similar changes: whitespace
 
+require "English"
 require "optparse"
 
 categories = []
@@ -80,8 +81,8 @@ end
 
 ##################################################################
 
-# @return [Boolean] false if there are no more cops to run
-def apply_one_cop(categories)
+# @return [String, nil] cop name or nil if there are no more cops to run
+def unconfigure_one_cop(categories)
   conf = File.read(YML)
 
   cop_config_rx = %r{
@@ -103,10 +104,17 @@ def apply_one_cop(categories)
 
   if cop_name.nil?
     puts "No more autocorrectable cops of category #{categories.join ", "}."
-    return false
+    return nil
   end
 
   File.write(YML, conf)
+  cop_name
+end
+
+# @return [Boolean] false if there are no more cops to run
+def apply_one_cop(categories)
+  cop_name = unconfigure_one_cop(categories)
+  return false if cop_name.nil?
 
   system "rubocop --auto-correct"
   system "git commit --all --message 'Rubocop autocorrected: #{cop_name}'"

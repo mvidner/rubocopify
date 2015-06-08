@@ -10,20 +10,12 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
-# Offense count: 2
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
-  Max: 25
+  Max: 22
 
-# Offense count: 1
-# Configuration parameters: Exclude.
-Style/FileName:
-  Enabled: false
-
-# Offense count: 2
 Style/RegexpLiteral:
   MaxSlashes: 0
 
-# Offense count: 4
 Style/RescueModifier:
   Enabled: false
