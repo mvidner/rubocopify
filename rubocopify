@@ -6,6 +6,7 @@ require "optparse"
 
 categories = []
 options = {
+  branch: true,
   once: false
 }
 
@@ -20,6 +21,9 @@ op = OptionParser.new do |opts|
   opts.on("-1", "--once", "Only the first cop, don't loop") do |v|
     options[:once] = v
   end
+  opts.on("-b", "--no-branch", "Don't create the 'rubocop' branch") do |v|
+    options[:branch] = v
+  end
 end
 op.parse!
 
@@ -27,10 +31,22 @@ categories = ["Style"] if categories.empty?
 
 ##################################################################
 
-current_branch = `git describe --all`.chomp
-if current_branch != "heads/rubocop"
-  system "git checkout -b rubocop"
+BRANCH = "rubocop"
+def setup_branch
+  current_branch = `git describe --all`.chomp
+  return if current_branch == "heads/#{BRANCH}"
+
+  system "git checkout #{BRANCH}"
+  return if $?.success?
+
+  system "git branch #{BRANCH}"
+  $?.success? || fail
+  system "git checkout #{BRANCH}"
+  $?.success? || fail
 end
+
+puts "BRANCH", options[:branch]
+setup_branch if options[:branch]
 
 ##################################################################
 
@@ -61,7 +77,7 @@ end
 def apply_one_cop(categories)
   conf = File.read(YML)
 
-  COP_CONFIG_RX = %r{
+  cop_config_rx = %r{
     \n
     \n
     \# \s Offense \s count .* \n
@@ -73,7 +89,7 @@ def apply_one_cop(categories)
   }x
 
   cop_name = nil
-  conf.sub!(COP_CONFIG_RX) do
+  conf.sub!(cop_config_rx) do
     cop_name = Regexp.last_match(1)
     "\n"
   end
