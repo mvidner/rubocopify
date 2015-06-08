@@ -31,6 +31,14 @@ categories = ["Style"] if categories.empty?
 
 ##################################################################
 
+uncommitted = `git status --porcelain`
+if ! uncommitted.empty?
+  puts uncommitted
+  exit 1
+end
+
+##################################################################
+
 BRANCH = "rubocop"
 def setup_branch
   current_branch = `git describe --all`.chomp
