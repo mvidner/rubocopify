@@ -78,7 +78,7 @@ unless File.exist? YML
   File.write(YML, config)
   File.unlink(TODO_YML)
 
-  system "git add #{YML}; git commit --message 'Rubocop: --auto-gen-config'"
+  system "git add #{YML}; git commit --message 'RuboCop: --auto-gen-config'"
 end
 
 ##################################################################
@@ -119,7 +119,7 @@ def apply_one_cop(categories, config_filename)
   return false if cop_name.nil?
 
   system "rubocop --auto-correct"
-  system "git commit --all --message 'Rubocop autocorrected: #{cop_name}'"
+  system "git commit --all --message 'RuboCop autocorrected: #{cop_name}'"
   system "git show | cat"
 
   true
