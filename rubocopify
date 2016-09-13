@@ -61,6 +61,8 @@ setup_branch if options[:branch]
 YML = ".rubocop.yml"
 TODO_YML = ".rubocop_todo.yml"
 
+config_filename = File.exist?(TODO_YML) ? TODO_YML : YML
+
 unless File.exist? YML
   if (File.read "RPMNAME" rescue "").start_with? "yast"
     File.write(YML,
@@ -82,8 +84,8 @@ end
 ##################################################################
 
 # @return [String, nil] cop name or nil if there are no more cops to run
-def unconfigure_one_cop(categories)
-  conf = File.read(YML)
+def unconfigure_one_cop(categories, config_filename)
+  conf = File.read(config_filename)
 
   cop_config_rx = %r{
     \n
@@ -107,13 +109,13 @@ def unconfigure_one_cop(categories)
     return nil
   end
 
-  File.write(YML, conf)
+  File.write(config_filename, conf)
   cop_name
 end
 
 # @return [Boolean] false if there are no more cops to run
-def apply_one_cop(categories)
-  cop_name = unconfigure_one_cop(categories)
+def apply_one_cop(categories, config_filename)
+  cop_name = unconfigure_one_cop(categories, config_filename)
   return false if cop_name.nil?
 
   system "rubocop --auto-correct"
@@ -124,6 +126,6 @@ def apply_one_cop(categories)
 end
 
 loop do
-  apply_one_cop(categories) || break
+  apply_one_cop(categories, config_filename) || break
   break if options[:once]
 end
