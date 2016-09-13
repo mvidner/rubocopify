@@ -15,7 +15,7 @@ Metrics/MethodLength:
   Max: 22
 
 Style/RegexpLiteral:
-  MaxSlashes: 0
+  Enabled: false
 
 Style/RescueModifier:
   Enabled: false

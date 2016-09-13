@@ -32,7 +32,7 @@ end
 op.parse!
 
 categories = ["Style/.*"] if categories.empty?
-categories = Regexp.new(categories.join "|")
+categories = Regexp.new(categories.join("|"))
 
 ##################################################################
 
@@ -44,7 +44,7 @@ end
 
 ##################################################################
 
-BRANCH = "rubocop"
+BRANCH = "rubocop".freeze
 def setup_branch
   current_branch = `git describe --all`.chomp
   return if current_branch == "heads/#{BRANCH}"
@@ -53,17 +53,17 @@ def setup_branch
   return if $CHILD_STATUS.success?
 
   system "git branch #{BRANCH}"
-  $CHILD_STATUS.success? || fail
+  $CHILD_STATUS.success? || raise
   system "git checkout #{BRANCH}"
-  $CHILD_STATUS.success? || fail
+  $CHILD_STATUS.success? || raise
 end
 
 setup_branch if options[:branch]
 
 ##################################################################
 
-YML = ".rubocop.yml"
-TODO_YML = ".rubocop_todo.yml"
+YML = ".rubocop.yml".freeze
+TODO_YML = ".rubocop_todo.yml".freeze
 
 config_filename = File.exist?(TODO_YML) ? TODO_YML : YML
 
@@ -72,8 +72,7 @@ unless File.exist? YML
     File.write(YML,
                "# use the shared Yast defaults\n" \
                "inherit_from:\n" \
-               "  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml\n"
-               )
+               "  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml\n")
   end
 
   system "rubocop --auto-gen-config"
