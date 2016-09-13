@@ -94,14 +94,14 @@ def unconfigure_one_cop(categories, config_filename)
     \# \s Cop \s supports \s --auto-correct .* \n
     (?: \# [^\n]* \n )*
     ^ ( (?: #{categories.join '|'} ) / .* ) : \n
-    .*
-    \n
+    (?: . | \n )*?
+    \n\n
   }x
 
   cop_name = nil
   conf.sub!(cop_config_rx) do
     cop_name = Regexp.last_match(1)
-    "\n"
+    "\n\n"
   end
 
   if cop_name.nil?
