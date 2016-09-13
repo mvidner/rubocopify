@@ -14,10 +14,13 @@ options = {
 op = OptionParser.new do |opts|
   opts.banner = "Usage: rubocopify [options]"
   opts.on("-s", "--style", "Apply Style/* cops (default)") do |_v|
-    categories << "Style"
+    categories << "Style/.*"
   end
   opts.on("-l", "--lint", "Apply Lint/* cops") do |_v|
-    categories << "Lint"
+    categories << "Lint/.*"
+  end
+  opts.on("-c", "--cops=REGEXP", "Apply cops matching regexp") do |regexp|
+    categories << regexp
   end
   opts.on("-1", "--once", "Only the first cop, don't loop") do |v|
     options[:once] = v
@@ -28,7 +31,8 @@ op = OptionParser.new do |opts|
 end
 op.parse!
 
-categories = ["Style"] if categories.empty?
+categories = ["Style/.*"] if categories.empty?
+categories = Regexp.new(categories.join "|")
 
 ##################################################################
 
@@ -93,7 +97,7 @@ def unconfigure_one_cop(categories, config_filename)
     \# \s Offense \s count .* \n
     \# \s Cop \s supports \s --auto-correct .* \n
     (?: \# [^\n]* \n )*
-    ^ ( (?: #{categories.join '|'} ) / .* ) : \n
+    ^ ( #{categories} ) : \n
     (?: . | \n )*?
     \n\n
   }x
@@ -105,7 +109,7 @@ def unconfigure_one_cop(categories, config_filename)
   end
 
   if cop_name.nil?
-    puts "No more autocorrectable cops of category #{categories.join ", "}."
+    puts "No more autocorrectable cops of category #{categories}."
     return nil
   end
 
@@ -118,6 +122,7 @@ def apply_one_cop(categories, config_filename)
   cop_name = unconfigure_one_cop(categories, config_filename)
   return false if cop_name.nil?
 
+  puts cop_name
   system "rubocop --auto-correct"
   system "git commit --all --message 'RuboCop autocorrected: #{cop_name}'"
   system "git show | cat"
